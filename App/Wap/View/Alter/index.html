@@ -1,0 +1,176 @@
+<style>
+    .change-btn {
+        margin: 10px 20px;
+        line-height: 40px;
+        color: #fff;
+        font-size: 17px;
+        text-align: center;
+        background-color: #409eff;
+        border: 1px solid #1e90ff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .change-btn:hover {
+        box-shadow: 0 15px 30px 0 rgba(255,255,255,0.15) inset,0 2px 7px 0 rgba(0,0,0,0.2);
+    }
+    .clean-btn {
+        margin: 10px 20px;
+        line-height: 40px;
+        color: #409eff;
+        font-size: 17px;
+        text-align: center;
+        background-color: #fff;
+        border: 1px solid #1e90ff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .clean-btn:hover {
+        box-shadow: 0 15px 30px 0 rgba(255,255,255,0.15) inset,0 2px 7px 0 rgba(0,0,0,0.2);
+    }
+</style>
+
+<div id="VueBox">
+    <div class="sg-header">
+        <div @click="ChangeDBSelect = true" class="filter">
+            <span :style="{'color':ChangeDBSelect?'#3598dc':'#3d4245'}">{{DB_CONFIG[db_config_index].DB_FLAG}}</span>
+            <i class="iconfont icon-xialajiantou"></i>
+        </div>
+    </div>
+    <div class="drop-select-box">
+        <div @click="ChangeDBSelect = false" @touchmove.prevent class="shadow" :style="{'display':ChangeDBSelect?'block':'none'}"></div>
+        <div class="select" :style="{'display':ChangeDBSelect?'block':'none'}">
+            <div v-for="(v,k) in DB_CONFIG" @click="ChangeDB(k)" class="option" :class="{'selected-blue':k === db_config_index}">
+                {{v.DB_FLAG}}
+                <i class="iconfont icon-xuanzhong"></i>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 60px;text-align: center;" v-if="!Number(DB_CONFIG[db_config_index].isnew)">id&nbsp;[&nbsp;<span style="color: #3598dc;">{{id}}</span>&nbsp;]</div>
+    <el-slider vertical height="250px" :style="{'margin-top':Number(DB_CONFIG[db_config_index].isnew)?'80px':'20px'}" :min="0" :max="10000" v-model="Value"></el-slider>
+    <div style="margin: 30px 0;text-align: center;">
+        <el-input-number :min="0" :max="10000" v-model="Value"></el-input-number>
+    </div>
+    <div class="change-btn" @click="changeValue()">修改</div>
+    <div class="clean-btn" @click="cleanRecord()">清空记录</div>
+    <div style="margin: 20px 0 80px;">
+        <div style="padding: 2px 20px;font-size: 14px;text-align: center;overflow: auto;white-space: nowrap;" v-for="v in record">
+            <span v-if="!Number(DB_CONFIG[db_config_index].isnew)">id&nbsp;[&nbsp;<span style="color: #3598dc;">{{v.id}}</span>&nbsp;]</span>
+            <span style="color: #3598dc;text-decoration: underline;cursor: pointer;" @click="recover(v)">{{v.before}}</span>
+            <i class="iconfont icon-youjiantouxiangyouqianwangmianxing" style="color: #3598dc;"></i>&nbsp;<span style="color: #3598dc;">{{v.after}}</span>
+            [&nbsp;<span style="color: #3598dc;">{{v.time}}</span>&nbsp;]
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#VueBox',
+        data: {
+            DB_CONFIG: eval('(' + '{$DB_CONFIG}' + ')'),
+            db_config_index: parseInt('{$db_config_index}'),
+            ChangeDBSelect: false,
+            id: null,
+            Value: null,
+            record: null
+        },
+        methods: {
+            ChangeDB: function (k) {
+                this.ChangeDBSelect = false;
+                window.location.href = '{:U(ACTION_NAME)}?db_config_index=' + k;
+            },
+            getValue: function () {
+                var _this = this;
+                $.ajax({
+                    url: '{:U(\'getValue_api\')}',
+                    type: 'get',
+                    data: {db_config_index: _this.db_config_index},
+                    beforeSend: function () {
+                        _this.$indicator.open();
+                    },
+                    success: function (respon) {
+                        _this.$indicator.close();
+                        var respon = eval('(' + respon + ')');
+                        if(respon.ret === '{:C(\'succ_ret\')}'){
+                            if(!Number(_this.DB_CONFIG[_this.db_config_index].isnew)){
+                                _this.id = respon.id;
+                            }
+                            _this.Value = respon.Value;
+                        }else{
+                            $.toast(respon.msg,'forbidden');
+                        }
+                    }
+                });
+            },
+            changeValue: function () {
+                var _this = this;
+                $.confirm('确认要修改吗？','',function () {
+                    $.ajax({
+                        url: '{:U(\'changeValue_api\')}',
+                        type: 'get',
+                        data: Object.assign({},{
+                            db_config_index: _this.db_config_index,
+                            Value: _this.Value
+                        },Number(_this.DB_CONFIG[_this.db_config_index].isnew)?{}:{id: _this.id}),
+                        beforeSend: function () {
+                            _this.$indicator.open();
+                        },
+                        success: function (respon) {
+                            _this.$indicator.close();
+                            var respon = eval('(' + respon + ')');
+                            if(respon.ret === '{:C(\'succ_ret\')}'){
+                                $.alert(respon.msg,'',function () {
+                                    _this.getValue();
+                                    _this.getRecord();
+                                });
+                            }else{
+                                $.toast(respon.msg,'forbidden');
+                            }
+                        }
+                    });
+                });
+            },
+            getRecord: function () {
+                var _this = this;
+                $.ajax({
+                    url: '{:U(\'getRecord_api\')}',
+                    type: 'get',
+                    data: {db_config_index: _this.db_config_index},
+                    beforeSend: function () {
+                        _this.$indicator.open();
+                    },
+                    success: function (respon) {
+                        _this.$indicator.close();
+                        _this.record = eval('(' + respon + ')');
+                    }
+                });
+            },
+            cleanRecord: function () {
+                var _this = this;
+                $.confirm('确认要清空记录吗？','',function () {
+                    $.ajax({
+                        url: '{:U(\'cleanRecord_api\')}',
+                        type: 'get',
+                        data: {db_config_index: _this.db_config_index},
+                        beforeSend: function () {
+                            _this.$indicator.open();
+                        },
+                        success: function () {
+                            _this.$indicator.close();
+                            _this.getRecord();
+                        }
+                    });
+                });
+            },
+            recover: function (v) {
+                if(!Number(this.DB_CONFIG[this.db_config_index].isnew)){
+                    this.id = v.id;
+                }
+                this.Value = v.before;
+            }
+        },
+        mounted: function () {
+            this.getValue();
+            this.getRecord();
+        }
+    });
+</script>

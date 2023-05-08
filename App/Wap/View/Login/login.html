@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+{__NOLAYOUT__}
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+	<link href="__RES__/logo.png" rel="shortcut icon">
+	<title>登录</title>
+	<!-- jQuery -->
+	<script src="__RES__/jquery.min.js"></script>
+	<!-- jQuery WeUI -->
+	<link rel="stylesheet" href="__RES__/jqweui/css/weui.min.css">
+	<link rel="stylesheet" href="__RES__/jqweui/css/jquery-weui.min.css">
+	<script src="__RES__/jqweui/js/jquery-weui.min.js"></script>
+	<!-- 阿里图标cdn -->
+	<link rel="stylesheet" href="{:C('ali_iconfont_cdn')}">
+	<style>
+		body {
+			background-color: #fff;
+		}
+		.login-container {
+			margin: 15px 0 60px;
+			padding: 0 20px;
+		}
+		.login-container .input-box {
+			margin-top: 10px;
+			padding: 6px 13px;
+			border: 1px solid #e2e2e2;
+			border-radius: 5px;
+			display: -webkit-box;
+		}
+		.login-container .input-box .iconfont {
+			margin-right: 13px;
+			line-height: 40px;
+			color: #d1d1d1;
+		}
+		.login-container .input-box input {
+			-webkit-box-flex: 1;
+			display: block;
+			width: 100%;
+			line-height: 40px;
+			font-size: 16px;
+			border: none;
+			border-left: 1px solid #e7e7e7;
+			text-indent: 15px;
+			outline: none;
+		}
+		.login-container .input-box input::-webkit-input-placeholder {
+			color: #b3b3b3;
+		}
+		.login-container .input-box input:-moz-placeholder {
+			color: #b3b3b3;
+		}
+		.login-container .input-box input::-moz-placeholder {
+			color: #b3b3b3;
+		}
+		.login-container .input-box input:-ms-input-placeholder {
+			color: #b3b3b3;
+		}
+		.login-container .input-box #code_img {
+			margin-left: 15px;
+			width: 100px;
+			height: 40px;
+			border-radius: 3px;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+		.login-container .login-btn {
+			margin-top: 10px;
+			width: 100%;
+			line-height: 40px;
+			color: #fff;
+			font-size: 17px;
+			text-align: center;
+			background-color: #4b0;
+			border: 1px solid #0a0;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		.login-container .login-btn:hover {
+			box-shadow: 0 15px 30px 0 rgba(255,255,255,0.15) inset,0 2px 7px 0 rgba(0,0,0,0.2);
+		}
+	</style>
+</head>
+<body>
+<img src="__RES__/logo.png" style="margin: 20px auto 10px;width: 180px;display: block;">
+<p style="padding: 2px 30px;font-size: 17px;text-align: center;word-break: break-all;">{:C('FactoryName')}</p>
+<div class="login-container">
+	<div class="input-box">
+		<i class="iconfont icon-denglu3"></i>
+		<input placeholder="账号" id="username">
+	</div>
+	<div class="input-box">
+		<i class="iconfont icon-iconfontmima"></i>
+		<input type="password" placeholder="密码" id="password">
+	</div>
+	<div class="input-box" style="margin-bottom: 25px;">
+		<i class="iconfont icon-ecurityCode"></i>
+		<input type="number" placeholder="验证码" id="code">
+		<img id="code_img" src="{:U('make_code')}" onclick="change_code_img()">
+	</div>
+	<div class="login-btn" onclick="login();return false;">登录</div>
+</div>
+<script>
+    function login(){
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var code = $('#code').val();
+        if(!username){$.toast('请输入账号','cancel');return;}
+        if(!password){$.toast('请输入密码','cancel');return;}
+        if(!code){$.toast('请输入验证码','cancel');return;}
+        $.ajax({
+            url: '{:U(\'login_api\')}',
+            type: 'get',
+            data: {username: username,password: password,code: code},
+            success: function (respon) {
+                var respon = eval('(' + respon + ')');
+                if(respon.ret === '{:C(\'succ_ret\')}'){
+                    window.location.href = (respon.SG_ReturnUrl)?respon.SG_ReturnUrl:'{:U(\'Monitor/websocket\')}';
+                }else{
+                    $.toast(respon.msg,'cancel');
+                    change_code_img();
+                }
+            }
+        });
+    }
+    function change_code_img(){
+        $('#code_img').attr('src','{:U(\'make_code\')}?' + Math.random());
+        $('#code').val('');
+    }
+</script>
+</body>
+</html>

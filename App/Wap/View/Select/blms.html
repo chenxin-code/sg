@@ -1,0 +1,76 @@
+<style>
+    .el-table--border {
+        border: none;
+    }
+    .el-table td {
+        padding: 8px 10px;
+        text-align: left;
+    }
+</style>
+
+<div id="VueBox">
+    <div class="sg-header">
+        <div @click="ChangeDBSelect = true" class="filter">
+            <span :style="{'color':ChangeDBSelect?'#1aad19':'#3d4245'}">{{DB_CONFIG[DB].DB_FLAG}}</span>
+            <i class="iconfont icon-xialajiantou"></i>
+        </div>
+    </div>
+    <div class="drop-select-box">
+        <div @click="ChangeDBSelect = false" @touchmove.prevent class="shadow" :style="{'display':ChangeDBSelect?'block':'none'}"></div>
+        <div class="select" :style="{'display':ChangeDBSelect?'block':'none'}">
+            <div v-for="(v,k) in DB_CONFIG" @click="ChangeDB(k)" class="option" :class="{'selected':k === DB}">
+                {{v.DB_FLAG}}
+                <i class="iconfont icon-xuanzhong"></i>
+            </div>
+        </div>
+    </div>
+    <el-table :data="lists" border style="margin: 40px 0 60px;" :height="$(document).height() - 100">
+        <el-table-column :prop="v" :label="v" width="130" v-for="v in CengInfo"></el-table-column>
+    </el-table>
+</div>
+
+<script>
+    new Vue({
+        el: '#VueBox',
+        data: {
+            DB: Number('{:session(\'SG_User.DB\')}')?Number('{:session(\'SG_User.DB\')}'):0,
+            DB_CONFIG: eval('(' + '{$DB_CONFIG}' + ')'),
+            ChangeDBSelect: false,
+            CengInfo: null,
+            lists: null
+        },
+        methods: {
+            search: function () {
+                var _this = this;
+                _this.CengInfo = null;
+                _this.lists = null;
+                $.ajax({
+                    url: '{:U(\'blms_api\')}',
+                    type: 'get',
+                    data: {DB: _this.DB},
+                    beforeSend: function () {
+                        _this.$indicator.open();
+                    },
+                    success: function (respon) {
+                        _this.$indicator.close();
+                        var respon = eval('(' + respon + ')');
+                        if(respon.ret === '{:C(\'succ_ret\')}'){
+                            _this.CengInfo = respon.CengInfo;
+                            _this.lists = respon.data;
+                        }else{
+                            $.toast(respon.msg,'forbidden');
+                        }
+                    }
+                });
+            },
+            ChangeDB: function (k) {
+                this.ChangeDBSelect = false;
+                this.DB = k;
+                this.search();
+            }
+        },
+        mounted: function () {
+            this.search();
+        }
+    });
+</script>

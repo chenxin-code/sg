@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <link href="__RES__/logo.png" rel="shortcut icon">
+    <title>{$LayoutTitle}</title>
+    <script src="__RES__/vue.js"></script>
+    <!-- jQuery -->
+    <script src="__RES__/jquery.min.js"></script>
+    <!-- jQuery WeUI -->
+    <link rel="stylesheet" href="__RES__/jqweui/css/weui.min.css">
+    <link rel="stylesheet" href="__RES__/jqweui/css/jquery-weui.min.css">
+    <script src="__RES__/jqweui/js/jquery-weui.min.js"></script>
+    <!-- ElementUI -->
+    <link rel="stylesheet" href="__RES__/ElementUI/index.css">
+    <script src="__RES__/ElementUI/index.js"></script>
+    <!-- mint-ui -->
+    <link rel="stylesheet" href="__RES__/mint-ui/style.css">
+    <script src="__RES__/mint-ui/index.js"></script>
+    <!-- 阿里图标cdn -->
+    <link rel="stylesheet" href="{:C('ali_iconfont_cdn')}">
+    <!-- common 样式 -->
+    <link rel="stylesheet" href="__RES__/common.css?time={:time()}">
+    <!-- 函数库 -->
+    <script src="__RES__/function.js?time={:time()}"></script>
+</head>
+<body>
+{__LAYOUT_CONTENT__}
+<div class="sg-footer">
+    <a href="{:U('Monitor/websocket')}">
+        <div class="icon">
+            <i class="iconfont icon-shexiangtou" :style="{'color':menu1?'#3598dc':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu1?'#3598dc':'#999'}">生产监控</p>
+    </a>
+    <a href="{:U('Select/bl')}">
+        <div class="icon">
+            <i class="iconfont icon-sousuo" :style="{'color':menu2?'#1aad19':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu2?'#1aad19':'#999'}">备料</p>
+    </a>
+    <a href="{:U('Select/blms')}">
+        <div class="icon">
+            <i class="iconfont icon-sousuo" :style="{'color':menu3?'#1aad19':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu3?'#1aad19':'#999'}">备料米数</p>
+    </a>
+    <a href="{:U('Select/scdd')}">
+        <div class="icon">
+            <i class="iconfont icon-sousuo" :style="{'color':menu4?'#1aad19':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu4?'#1aad19':'#999'}">生产订单</p>
+    </a>
+    <a href="{:U('Select/wgdd')}">
+        <div class="icon">
+            <i class="iconfont icon-sousuo" :style="{'color':menu5?'#1aad19':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu5?'#1aad19':'#999'}">完工订单</p>
+    </a>
+    <a href="{:U('Alter/index')}" v-if="Number('{:session(\'SG_User.root\')}') === 0">
+        <div class="icon">
+            <i class="iconfont icon-xiugai" :style="{'color':menu6?'#3598dc':'#999'}"></i>
+        </div>
+        <p :style="{'color':menu6?'#3598dc':'#999'}">修改</p>
+    </a>
+    <a @click="logout()" style="cursor: pointer;">
+        <div class="icon">
+            <i class="iconfont icon-tuichu"></i>
+        </div>
+        <p style="margin-top: 5px;">退出</p>
+    </a>
+    <a href="javascript:location.reload();">
+        <div class="icon">
+            <i class="iconfont icon-shuaxin"></i>
+        </div>
+        <p style="margin-top: 5px;">刷新</p>
+    </a>
+</div>
+<script>
+    new Vue({
+        el: '.sg-footer',
+        data: {
+            CurCA: '{:CONTROLLER_NAME}/{:ACTION_NAME}',
+            menu1: false,
+            menu2: false,
+            menu3: false,
+            menu4: false,
+            menu5: false,
+            menu6: false
+        },
+        methods: {
+            logout: function () {
+                $.confirm('确定要退出吗？','',
+                    function () {
+                        window.location.href = '{:U(\'Logout/logout\')}';
+                    }
+                );
+            }
+        },
+        mounted: function () {
+            if(this.CurCA === 'Monitor/websocket'){
+                this.menu1 = true;
+            }else if(this.CurCA === 'Select/bl'){
+                this.menu2 = true;
+            }else if(this.CurCA === 'Select/blms'){
+                this.menu3 = true;
+            }else if(this.CurCA === 'Select/scdd'){
+                this.menu4 = true;
+            }else if(this.CurCA === 'Select/wgdd'){
+                this.menu5 = true;
+            }else if(this.CurCA === 'Alter/index'){
+                this.menu6 = true;
+            }else{
+
+            }
+        }
+    });
+</script>
+</body>
+</html>
